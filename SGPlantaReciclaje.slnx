@@ -1,0 +1,10 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="SGPlantaReciclajeController/SGPlantaReciclajeController.vcxproj" />
+  <Project Path="SGPlantaReciclajeDAO/SGPlantaReciclajeDAO.vcxproj" />
+  <Project Path="SGPlantaReciclajeModel/SGPlantaReciclajeModel.vcxproj" />
+  <Project Path="SGPlantaReciclajeView/SGPlantaReciclajeView.vcxproj" />
+</Solution>

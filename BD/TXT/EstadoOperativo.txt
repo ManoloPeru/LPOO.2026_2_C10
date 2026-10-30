@@ -1,0 +1,4 @@
+1;Operativo
+2;En Mantenimiento
+3;Falla Crítica
+4;Apagado

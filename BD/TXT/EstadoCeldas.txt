@@ -1,0 +1,4 @@
+1;Activa
+2;En Configuración
+3;Detenida por Alerta
+4;Mantenimiento

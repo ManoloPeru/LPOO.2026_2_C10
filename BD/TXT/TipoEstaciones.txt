@@ -1,0 +1,4 @@
+1;Neumática
+2;Magnética
+3;Óptica
+4;Otros

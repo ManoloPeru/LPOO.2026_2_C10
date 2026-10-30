@@ -1,0 +1,4 @@
+1;Trituración
+2;Lavado
+3;Compactación
+4;Clasificación

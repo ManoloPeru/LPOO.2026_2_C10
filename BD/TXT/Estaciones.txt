@@ -1,0 +1,5 @@
+EST-NEU-001;Clasificadora-Neumatica-01;1;4;Linea de Clasificación de Polímeros
+SEP-MAG-002;Separadora-Mag-05;2;1;Zona de Extracción de Metales
+EST-OPT-003;Clasificadora-Optica-01;4;4;Linea de Clasificación de Polímeros
+SEP-MAG-004;Separadora 04;2;2;Zona de Mantenimiento
+EST-OPT-005;Separadora 05;3;1;Linea de Clasificación de Polímeros
