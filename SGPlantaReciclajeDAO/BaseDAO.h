@@ -66,10 +66,10 @@ namespace SGPlantaReciclajeDAO {
 			void abrirConexion();	
 
 			// Metodo para ejecutar sentencias INSERT SQL en la Base de Datos
-			int insertSql(String^ sSql); 
+			int insertSql(String^ sSql, array<SqlParameter^>^ parametros);
 
 			// Metodo para ejecutar sentencias UPDATE/DELETE SQL en la Base de Datos
-			bool executeSql(String^ sSql); 
+			bool executeSql(String^ sSql, array<SqlParameter^>^ parametros); 
 
 			// Metodo para cerrar la conexion
 			void cerrarConexion(); 

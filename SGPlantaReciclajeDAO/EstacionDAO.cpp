@@ -11,12 +11,16 @@ EstacionDAO::EstacionDAO() : BaseDAO() {}
 int EstacionDAO::registrarEstacion(Estacion^ estacion) {
     // Como el ID no es IDENTITY en tu tabla, debes enviarlo explícitamente.
     String^ sSql = "INSERT INTO Estacion (Alias, Ubicacion, Estado, CapacidadKgH, HorasOperacion) " +
-        "VALUES ('" + estacion->getAlias() + "', " +
-        "'" + estacion->getUbicacion() + "', " +
-        estacion->getEstado() + ", " +
-        estacion->getCapacidadKgH() + ", " +
-        estacion->getHorasOperacion() + ")";
-    return insertSql(sSql);
+                   "VALUES (@alias, @ubicacion, @estado, @capacidad, @horas)";
+    // Creamos un arreglo de parámetros para pasar los valores
+    array<SqlParameter^>^ parametros = gcnew array<SqlParameter^>(5);
+    parametros[0] = gcnew SqlParameter("@alias", estacion->getAlias());
+    parametros[1] = gcnew SqlParameter("@ubicacion", estacion->getUbicacion());
+    parametros[2] = gcnew SqlParameter("@estado", estacion->getEstado());
+    parametros[3] = gcnew SqlParameter("@capacidad", estacion->getCapacidadKgH());
+    parametros[4] = gcnew SqlParameter("@horas", estacion->getHorasOperacion());
+	// Llamamos a insertSql con el SQL y los parámetros
+    return insertSql(sSql, parametros);
 }
 
 // ============================================================
@@ -85,10 +89,13 @@ Estacion^ EstacionDAO::buscarxId(int estacionId) {
 List<Estacion^>^ EstacionDAO::buscarxIdxEstado(int estacionId, int idEstado) {
     List<Estacion^>^ lista = gcnew List<Estacion^>();
     String^ sSql = "SELECT EstacionId, Alias, Ubicacion, Estado, CapacidadKgH, HorasOperacion " +
-        "FROM Estacion WHERE EstacionId = " + estacionId + " OR Estado = " + idEstado;
+        "FROM Estacion WHERE EstacionId = @estacionId OR Estado = @idEstado";
     try {
         abrirConexion();
         SqlCommand^ comando = gcnew SqlCommand(sSql, this->getObjConexion());
+		// Usamos parámetros para evitar Inyección SQL
+        comando->Parameters->AddWithValue("@estacionId", estacionId);
+        comando->Parameters->AddWithValue("@idEstado", idEstado);
         SqlDataReader^ reader = comando->ExecuteReader();
         while (reader->Read()) {
             Estacion^ e = gcnew Estacion(
@@ -114,19 +121,31 @@ List<Estacion^>^ EstacionDAO::buscarxIdxEstado(int estacionId, int idEstado) {
 // UPDATE: Modificar Estación
 // ============================================================
 bool EstacionDAO::modificarEstacion(Estacion^ estacion) {
-    String^ sSql = "UPDATE Estacion SET Alias='" + estacion->getAlias() + "', " +
-        "Ubicacion='" + estacion->getUbicacion() + "', " +
-        "Estado="+ estacion->getEstado() +", " +
-        "CapacidadKgH="+ estacion->getCapacidadKgH() +", " +
-        "HorasOperacion="+ estacion->getHorasOperacion() + " " +
-        "WHERE EstacionId=" + estacion->getEstacionId();
-    return executeSql(sSql);
+	// Usamos @parametros en la sentencia SQL
+    String^ sSql = "UPDATE Estacion SET Alias=@Alias, " +
+        "Ubicacion=@Ubicacion, " +
+        "Estado=@Estado, " +
+        "CapacidadKgH=@CapacidadKgH, " +
+        "HorasOperacion=@HorasOperacion " +
+        "WHERE EstacionId=@EstacionId";
+	// Creamos un arreglo de parámetros para pasar los valores
+    array<SqlParameter^>^ parametros = gcnew array<SqlParameter^>(6);
+    parametros[0] = gcnew SqlParameter("@Alias", estacion->getAlias());
+    parametros[1] = gcnew SqlParameter("@Ubicacion", estacion->getUbicacion());
+    parametros[2] = gcnew SqlParameter("@Estado", estacion->getEstado());
+    parametros[3] = gcnew SqlParameter("@CapacidadKgH", estacion->getCapacidadKgH());
+    parametros[4] = gcnew SqlParameter("@HorasOperacion", estacion->getHorasOperacion());
+    parametros[5] = gcnew SqlParameter("@EstacionId", estacion->getEstacionId());
+	// Llamamos a executeSql con el SQL y los parámetros
+    return executeSql(sSql, parametros);
 }
 
 // ============================================================
 // DELETE: Eliminar Estación
 // ============================================================
 bool EstacionDAO::eliminarEstacion(int estacionId) {
-    String^ sSql = "DELETE FROM Estacion WHERE EstacionId = " + estacionId;
-    return executeSql(sSql);
+    String^ sSql = "DELETE FROM Estacion WHERE EstacionId = @estacionId";
+    array<SqlParameter^>^ parametros = gcnew array<SqlParameter^>(1);
+    parametros[0] = gcnew SqlParameter("@estacionId", estacionId);
+    return executeSql(sSql, parametros);
 }

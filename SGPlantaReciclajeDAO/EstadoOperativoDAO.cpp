@@ -170,10 +170,12 @@ List<EstadoOperativo^>^ EstadoOperativoDAO::buscarTodosSQL() {
 }
 
 EstadoOperativo^ EstadoOperativoDAO::buscarxIdSQL(int idEstadoOperativo) {
-	String^ sSql = "SELECT idEstadoOperativo, descripcion FROM EstadoOperativo WHERE idEstadoOperativo = " + idEstadoOperativo;
+	String^ sSql = "SELECT idEstadoOperativo, descripcion FROM EstadoOperativo WHERE idEstadoOperativo = @idEstadoOperativo";
 	try {
 		abrirConexion();
 		SqlCommand^ comando = gcnew SqlCommand(sSql, this->getObjConexion());
+		// Usamos parámetros para evitar Inyección SQL
+		comando->Parameters->AddWithValue("@idEstadoOperativo", idEstadoOperativo);
 		SqlDataReader^ reader = comando->ExecuteReader();
 		if (reader->Read()) {
 			EstadoOperativo^ estado = gcnew EstadoOperativo(
@@ -194,18 +196,33 @@ EstadoOperativo^ EstadoOperativoDAO::buscarxIdSQL(int idEstadoOperativo) {
 }
 
 int EstadoOperativoDAO::registrarEstadoSQL(EstadoOperativo^ estado) {
+	// Usamos parámetros para evitar Inyección SQL
 	String^ sSql = "INSERT INTO EstadoOperativo (descripcion) " + 
-		"VALUES('" + estado->getDescripcion() + "')";
-	return insertSql(sSql);
+				   "VALUES(@descripcion)";
+	// Creamos un arreglo de parámetros para pasar al método insertSql
+    array<SqlParameter^>^ parametros = gcnew array<SqlParameter^>(1);
+    parametros[0] = gcnew SqlParameter("@descripcion", estado->getDescripcion());
+	// Llamamos a insertSql con el SQL y los parámetros
+    return insertSql(sSql, parametros);
 }
 
 bool EstadoOperativoDAO::modificarEstadoSQL(EstadoOperativo^ estado) {
-	String^ sSql = "UPDATE EstadoOperativo SET descripcion = '" + estado->getDescripcion() + "' " + 
-		"WHERE idEstadoOperativo = " + estado->getIdEstadoOperativo();
-	return executeSql(sSql);
+	// 1. Usamos @parametros en la sentencia SQL
+	String^ sSql = "UPDATE EstadoOperativo SET descripcion = @descripcion " +
+				   "WHERE idEstadoOperativo = @idEstadoOperativo";
+
+	// 2. Creamos el arreglo de parámetros
+	array<SqlParameter^>^ parametros = gcnew array<SqlParameter^>(2);
+	parametros[0] = gcnew SqlParameter("@descripcion", estado->getDescripcion());
+	parametros[1] = gcnew SqlParameter("@idEstadoOperativo", estado->getIdEstadoOperativo());
+
+	// 3. Llamamos al nuevo método seguro de BaseDAO
+	return executeSql(sSql, parametros);
 }
 
 bool EstadoOperativoDAO::eliminarEstadoSQL(int idEstadoOperativo) {
-	String^ sSql = "DELETE FROM EstadoOperativo WHERE idEstadoOperativo = " + idEstadoOperativo;
-	return executeSql(sSql);
+	String^ sSql = "DELETE FROM EstadoOperativo WHERE idEstadoOperativo = @idEstadoOperativo";
+	array<SqlParameter^>^ parametros = gcnew array<SqlParameter^>(1);
+	parametros[0] = gcnew SqlParameter("@idEstadoOperativo", idEstadoOperativo);
+	return executeSql(sSql, parametros);
 }

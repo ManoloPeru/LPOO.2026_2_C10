@@ -133,32 +133,52 @@ void BaseDAO::abrirConexion() {
 }
 
 // Metodo para ejecutar sentencias INSERT SQL en la Base de Datos, devuelve el IdPK generado
-int BaseDAO::insertSql(String^ sSql) {
+int BaseDAO::insertSql(String^ sSql, array<SqlParameter^>^ parametros) {
 	try {
 		abrirConexion();
 		String^ sSqlPK = sSql + "; SELECT SCOPE_IDENTITY();"; // SCOPE_IDENTITY(): Permite obtener el valor del IdPK generado
 		SqlCommand^ comando = gcnew SqlCommand(sSqlPK, this->getObjConexion());
-		int idPK = Convert::ToInt32(comando->ExecuteScalar()); // ExecuteScalar(): Ejecuta la consulta y devuelve la primera columna de la primera fila del conjunto de resultados
-		this->cerrarConexion();
-		return idPK;
+
+		// Agregar los parámetros al comando
+		if (parametros != nullptr) {
+			comando->Parameters->AddRange(parametros);
+		}
+
+		// ExecuteScalar obtiene el SCOPE_IDENTITY si está en la consulta
+		Object^ resultado = comando->ExecuteScalar();
+		cerrarConexion();
+
+		return (resultado != nullptr) ? Convert::ToInt32(resultado) : 0;
 	}
 	catch (Exception^ ex) {
 		Console::WriteLine("Error al ejecutar SQL: " + ex->Message);
+		if (this->getObjConexion()->State == System::Data::ConnectionState::Open) {
+			cerrarConexion();
+		}
 		return 0;
 	}
 }
 
 // Metodo para ejecutar sentencias UPDATE/DELETE SQL en la Base de Datos, devuelve true si se ejecutó correctamente
-bool BaseDAO::executeSql(String^ sSql) {
+bool BaseDAO::executeSql(String^ sSql, array<SqlParameter^>^ parametros) {
 	try {
 		abrirConexion();
 		SqlCommand^ comando = gcnew SqlCommand(sSql, this->getObjConexion());
-		comando->ExecuteNonQuery(); // ExecuteNonQuery(): Ejecuta una sentencia SQL que no devuelve filas (como UPDATE o DELETE)
+
+		// Asignar los parámetros al comando
+		if (parametros != nullptr) {
+			comando->Parameters->AddRange(parametros);
+		}
+
+		comando->ExecuteNonQuery();
 		this->cerrarConexion();
 		return true;
 	}
 	catch (Exception^ ex) {
 		Console::WriteLine("Error al ejecutar SQL: " + ex->Message);
+		if (this->getObjConexion()->State == System::Data::ConnectionState::Open) {
+			cerrarConexion();
+		}
 		return false;
 	}
 }
